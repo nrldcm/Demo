@@ -20,14 +20,24 @@ namespace DEMO.Controllers
 
 		// GET: api/Books
 		[HttpGet]
-		public async Task<ActionResult<IEnumerable<Book>>> GetBooks(int page = 1, int pageSize = 10)
+		public async Task<ActionResult> GetBooks(int page = 1, int pageSize = 10)
 		{
 			var books = await _context.Book
+				.Include(cat=> cat.Category)
 				.Skip((page - 1) * pageSize)
 				.Take(pageSize)
+				.Select(s=> new
+				{
+					s.Id,
+					s.CategoryId,
+					CategoryName = s.Category.Name,
+					s.Title,
+					s.Description,
+					s.PublishDateUtc
+				})
 				.ToListAsync();
 
-			return books;
+			return Ok(books);
 		}
 
 		// GET: api/Books/5
